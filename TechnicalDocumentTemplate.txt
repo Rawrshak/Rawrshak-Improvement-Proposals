@@ -1,0 +1,15 @@
+# Technical Docs
+## Introduction
+Can be copied from Spec Template
+
+## Goals
+Can be copied from Spec Template
+
+## Approach
+High level view of the architecture or implementation details. Would be nice to have an graph, but not necessary
+
+## Alternative Approach
+Other options considered
+
+## Problems [If any]
+Problems that came up and how it was solved. If it hasn't been solved, please make note of it here.

@@ -1,0 +1,19 @@
+# Specifications Template
+## Introduction
+Introduction to the feature or project and why it is being created.
+
+## Goals
+The goals and results we would like for the feature.
+
+## Product Requirements
+A bit more technical details and specifics on tasks this feature needs to accomplish.
+
+## Out of Scope [If any]
+Things that this feature will not solve or isn't going to be tackled in this project. This includes things that we won't 
+do, solutions that we don't think will work, attributes that this project will not have, etc.
+
+## Security / Privacy [If any]
+Any privacy / security concerns that we need to take note of.
+
+## Other notes
+Any other notes or comments that don't necessarily fall under any of the previous headers
