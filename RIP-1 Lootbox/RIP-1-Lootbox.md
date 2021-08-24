@@ -35,9 +35,9 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 
 
 
-#
+
 # Proposed Technical Design
-#
+
 
 ## LootboxCredit.sol
 - Users burn this in exchange for loot boxes.
