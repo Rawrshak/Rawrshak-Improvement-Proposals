@@ -1,5 +1,5 @@
 # Rawrshak Loot Box Contract TDD - RIP-1
-# Author: livingaftermidnight
+## Author: livingaftermidnight
 
 ## Summary
 We want to give the players the ability to burn in-game items for credits that they can then redeem for loot boxes. Loot boxes will be transferable or can be burned in order to mint the items they contain (whether guaranteed or random).
@@ -30,6 +30,9 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 - Purchase (i.e. Mint) loot boxes with the credits they’ve earned (i.e. burn credits)
 - Send (i.e. Gift) loot boxes to someone else
 - Redeem (i.e. Burn) loot boxes to roll for the assets within.
+
+
+
 
 
 ## Proposed Technical Design
@@ -78,7 +81,8 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 - Individual ILootbox-derived Lootbox contracts will store a pointer to the storage contract for the reading of data in a read-only fashion.
 - Potentially partially upgradeable. Will need further investigation.
  
-# LootboxByItem.sol - Basic implementation of a Lootbox. All rewards are predetermined up front. Probabilities are stored by tokenId not by rarity/class.
+# LootboxByItem.sol
+- Basic implementation of a Lootbox. All rewards are predetermined up front. Probabilities are stored by tokenId not by rarity/class.
 - Implements ERC1155Upgradeable
 - Implements ILootbox
 - Stores a mapping of tokenIds to rarity classes.
@@ -113,7 +117,8 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 - Requests asset mint/burn permissions from each content contract that we need to interact with.
 	- IContent(tokenId).approvalAllSystems(true);
  
-# LootboxByClass.sol - Implementation of a Lootbox where probabilities are set by class type and not by individual items. Users will receive a random assortment of items from any class where the probability succeeds in the dice roll. Works a lot like OpenSea's MyLootBox.sol
+# LootboxByClass.sol
+- Implementation of a Lootbox where probabilities are set by class type and not by individual items. Users will receive a random assortment of items from any class where the probability succeeds in the dice roll. Works a lot like OpenSea's MyLootBox.sol
 - This class is very similar to LootboxByItem.sol except the following points:
 - Stores a mapping of LootboxOption (uint256) to OptionSettings (struct)
 	- OptionSettings contains the following:
