@@ -1,11 +1,11 @@
 ---
 rip: 1
 title: Lootbox System Feature
-description: Give the players the ability to burn in-game items for credits that they can then redeem for loot boxes
-author:  @livingaftermidnight
+author: (@livingaftermidnight)
 discussions-to: https://discord.gg/BeEjqs9Qtx
 status: Draft 
 created: 2021-08-23
+version: 0.1
 ---
 
 ## Abstract
