@@ -1,7 +1,8 @@
-# Rawrshak Loot Box Contract TDD - RIP-1
+# RIP-1: Rawrshak Loot Box Contract
 ## Author: livingaftermidnight
 
-## Summary
+
+## Design Summary
 We want to give the players the ability to burn in-game items for credits that they can then redeem for loot boxes. Loot boxes will be transferable or can be burned in order to mint the items they contain (whether guaranteed or random).
 
 ## Background
@@ -34,10 +35,11 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 
 
 
+#
+# Proposed Technical Design
+#
 
-## Proposed Technical Design
-
-# LootboxCredit.sol
+## LootboxCredit.sol
 - Users burn this in exchange for loot boxes.
 - SalvageableAssets (see LibCraft.sol) will be setup by the developer to include LootboxCredit as a given SalvageReward
 	- Developers fill out LibCraft.AssetData (need content address and LootboxCredit tokenId)
@@ -45,7 +47,7 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 - Implements ERC20
 	- This will allow the token to interface with the vast majority of existing ERC20-based dApps/systems.
  
-# LibLootbox.sol
+## LibLootbox.sol
 - Contains library level code for Lootbox functions/operations.
 - Contains dice roll functionality.
 	- random()
@@ -60,19 +62,19 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 	uint256 amount;          // amount of asset minted when dice roll probability is met.
 }
 
-# ILootbox.sol
+## ILootbox.sol
 - Interface that all Lootbox contracts share/implement
 - Functions for getting/setting credit cost
 - Functions for getting/setting content and probabilities that could be given when lootbox is burned.
 - Functions for the minting of content assets and transfer of said assets to the lootbox owner.
 
-# LootboxManager.sol
+## LootboxManager.sol
 - Developer talks to this (through the Content Creator dApp) to register ILootbox.sol instances
 	- Developer only usage, no player/user will ever need to interface with this contract.
 - Requires read/write permissions to set data into the LootboxStorage contract and a given Lootbox contract itself.
 - Developer will fill out a structure (i.e. LibLootbox.Recipe) and passes it to this manager contract which will create the lootbox contract and fill its internal data with the struct.
 
-# LootboxStorage.sol
+## LootboxStorage.sol
 - Storage class for storing important lootbox specific data that can be used across multiple lootbox types for a given Rawrshak project.
 - Stores lootbox "recipes" (i.e. ILootbox.sol instances)
 - Stores credit cost to buy each lootbox recipe
@@ -81,7 +83,7 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 - Individual ILootbox-derived Lootbox contracts will store a pointer to the storage contract for the reading of data in a read-only fashion.
 - Potentially partially upgradeable. Will need further investigation.
  
-# LootboxByItem.sol
+## LootboxByItem.sol
 - Basic implementation of a Lootbox. All rewards are predetermined up front. Probabilities are stored by tokenId not by rarity/class.
 - Implements ERC1155Upgradeable
 - Implements ILootbox
@@ -117,7 +119,7 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 - Requests asset mint/burn permissions from each content contract that we need to interact with.
 	- IContent(tokenId).approvalAllSystems(true);
  
-# LootboxByClass.sol
+## LootboxByClass.sol
 - Implementation of a Lootbox where probabilities are set by class type and not by individual items. Users will receive a random assortment of items from any class where the probability succeeds in the dice roll. Works a lot like OpenSea's MyLootBox.sol
 - This class is very similar to LootboxByItem.sol except the following points:
 - Stores a mapping of LootboxOption (uint256) to OptionSettings (struct)
@@ -128,27 +130,27 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 		- uint16[MAX_CLASSES] guarantees;   // Number of items you are guaranteed to get for each class.
 - Stores a mapping of classToTokenIds.
  
-# For Players/Users:
+## For Players/Users:
 - Talks to LootboxManager which talks to LootboxStorage to handle burning players credits and minting a given Lootbox.
 - Different Lootbox options will cost different credit amounts.
 - Players burn assets for LootboxCredit which they mint through the LootboxManager (which forwards the request to LootboxStorage).
 - Talks to a given/owned ERC1155 ILootbox.sol contract to burn it in exchange for assets it contains.
 
-# Extensibility
+## Extensibility
 
 Our two provided Lootbox contracts may work for the vast majority of developers but some developers we expect will want to add functionality and therefore mint their own unique lootbox contract. The dApp UI will need to allow devs to input their own lootbox contract address (follows ILootbox.sol).
 
-# Rarity / Classes
+## Rarity / Classes
 
 Developers will likely want to customize the different rarities that their items have. For instance, one project might want their rarities to be like Common, Uncommon, Rare, Ultra Rare while
 another project would want something like Bronze, Silver, Gold, Platinum, etc. The Content Creator dApp will need to allow the developer to input whatever rarity titles they want to use when
 they setup a project. We can store this into a data structure (likely an array) and access it throughout the contracts whenever we need to deal with item rarities.
  
-# The Graph support
+## The Graph support
 
 All mutative functions will emit events that allow the relational database stored within the Graph node to be updated.
 
-# Test Plan
+## Test Plan
 
 All major functionality will be tested with unit tests that ensure everything is working properly.		
 		
