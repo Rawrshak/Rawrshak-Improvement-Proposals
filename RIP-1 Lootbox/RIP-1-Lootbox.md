@@ -55,12 +55,12 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 	- randomBatch()
 		- May need to batch dice rolls together. So if there are 6 items that need randomization we return an array of 6 randomly seeded (non-unique) values.
 - Upgradeable (will likely want to upgrade dice roll functionality after launch).
-- struct LootboxReward (similar to LibCraft.sol SalvageReward)
-{
-	AssetData asset;	 // asset to be minted when some Lootbox is burned.
-	uint256 probability;  	 // stored in Wei
-	uint256 amount;          // amount of asset minted when dice roll probability is met.
-}
+- struct LootboxReward (similar to LibCraft.sol SalvageReward)<br>
+{<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AssetData asset; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// asset to be minted when some Lootbox is burned.<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint256 probability; &nbsp;&nbsp;// stored in ETH<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uint256 amount; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// amount of asset minted when dice roll probability is met.<br>
+}<br>
 
 ## ILootbox.sol
 - Interface that all Lootbox contracts share/implement
