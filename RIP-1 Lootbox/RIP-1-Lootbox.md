@@ -95,10 +95,6 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 - Basic implementation of a Lootbox. All rewards are predetermined up front. Probabilities are stored by tokenId not by rarity/class.
 - Implements ERC1155Upgradeable
 - Implements ILootbox
-- Stores a mapping of tokenIds to rarity classes.
-	- i.e. which tokenIds are assigned to a given rarity. This allows lootboxes to randomly pick tokenIds based on a given class when minting reward items.
-	- Obviously contains function methods for adding tokenIds to this mapping which will need filled out by the developer through the Content Creator dApp.
-- Stores a mapping of rarity class to a bool for whether or not the class is preminted.
 - Stores pointer to the LootboxStorage contract for grabbing any necessary data in a read-only fashion.
 - Uses LibLootbox.sol for dice roll (and other) functionality.
 - Stores content and probabilities that could be given when lootbox is burned.
@@ -136,7 +132,10 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 		- uint256[MAX_CLASSES] classProbabilities;  // Probability in ETH for receiving an item of each class. Descending.
 		- bool hasGuaranteedClasses;  // Whether or not to enable guaranteed items below
 		- uint16[MAX_CLASSES] guarantees;   // Number of items you are guaranteed to get for each class.
-- Stores a mapping of classToTokenIds.
+- Stores a mapping of tokenIds to rarity classes.
+	- i.e. which tokenIds are assigned to a given rarity. This allows lootboxes to randomly pick tokenIds based on a given class when minting reward items.
+	- Obviously contains function methods for adding tokenIds to this mapping which will need filled out by the developer through the Content Creator dApp.
+- Stores a mapping of rarity class to a bool for whether or not the class is preminted.
  
 ### For Players/Users:
 - Talks to LootboxManager which talks to LootboxStorage to handle burning players credits and minting a given Lootbox.
