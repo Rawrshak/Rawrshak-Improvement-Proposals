@@ -40,7 +40,7 @@ A content developer (games, art, etc) that wants to enable loot boxes will need 
 
 ### Player/User Perspective
 
-- A user will have the following loot box related abilities:
+A user will have the following loot box related abilities:
 - Burn assets for loot box credits
 - Purchase (i.e. Mint) loot boxes with the credits they’ve earned (i.e. burn credits)
 - Send (i.e. Gift) loot boxes to someone else
