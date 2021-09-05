@@ -139,9 +139,9 @@ A user will have the following loot box related abilities:
 - Stores a mapping of rarity class to a bool for whether or not the class is preminted.
  
 ### For Players/Users:
-- Talks to LootboxManager which talks to LootboxStorage to handle burning players credits and minting a given Lootbox.
+- Talks directly to a given loot box contract to handle burning players credits and minting said loot box.
 - Different Lootbox options will cost different credit amounts.
-- Players burn assets for LootboxCredit which they mint through the LootboxManager (which forwards the request to LootboxStorage).
+- Players burn assets for LootboxCredit which they mint through the Salvage contract.
 - Talks to a given/owned ERC1155 ILootbox.sol contract to burn it in exchange for assets it contains.
 
 ### Extensibility
