@@ -85,8 +85,8 @@ A user will have the following loot box related abilities:
 
 #### LootboxStorage.sol
 - Storage class for storing important lootbox specific data that can be used across multiple lootbox types for a given Rawrshak project.
-- Stores lootbox "recipes" (i.e. ILootbox.sol instances)
-- Stores credit cost to buy each lootbox recipe
+- Stores lootbox "recipes" called "blueprints" (i.e. ILootbox.sol instances)
+- Stores credit cost to buy each lootbox blueprint
 	- uint256 cost;
 - Stores per-game rarity classes (in array form) (i.e. Common, Uncommon, Rare, Ultra-Rare, etc)
 - Individual ILootbox-derived Lootbox contracts will store a pointer to the storage contract for the reading of data in a read-only fashion.
