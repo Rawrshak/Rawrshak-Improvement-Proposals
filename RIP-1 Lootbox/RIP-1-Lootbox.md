@@ -49,6 +49,7 @@ A user will have the following loot box related abilities:
 ### Proposed Technical Design
 #### LootboxCredit.sol
 - Users burn this in exchange for loot boxes.
+- Optionally created and per-developer.
 - SalvageableAssets (see LibCraft.sol) will be setup by the developer to include LootboxCredit as a given SalvageReward
 	- Developers fill out LibCraft.AssetData (need content address and LootboxCredit tokenId)
 	- Players can earn/mint LootboxCredit from burning SalvageableAssets.
@@ -80,7 +81,7 @@ A user will have the following loot box related abilities:
 - Developer talks to this (through the Content Creator dApp) to register ILootbox.sol instances
 	- Developer only usage, no player/user will ever need to interface with this contract.
 - Requires read/write permissions to set data into the LootboxStorage contract and a given Lootbox contract itself.
-- Developer will fill out a structure (i.e. LibLootbox.Recipe) and passes it to this manager contract which will create the lootbox contract and fill its internal data with the struct.
+- Developer will fill out a structure (i.e. LibLootbox.Blueprint) and passes it to this manager contract which will create the lootbox contract and fill its internal data with the struct.
 
 #### LootboxStorage.sol
 - Storage class for storing important lootbox specific data that can be used across multiple lootbox types for a given Rawrshak project.
