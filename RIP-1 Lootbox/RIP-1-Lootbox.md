@@ -14,7 +14,7 @@ We want to give the players the ability to burn in-game items for credits that t
 ## Motivation
 Lootboxes are a way to create demand for the ever-increasing supply of assets in the gaming ecosystem. Over time, gamers will continuously play games, unlock and mint assets. Aside from assets used as crafting material, there will eventually be an oversupply of common, even uncommon, assets. The Lootbox mechanism allows players to burn unwanted common assets and turn them into credits that can be redeemed for lootboxes. 
 
-Ideally, this creates an equilibrium price for common assets on the marketplace. If assets become too cheap, people can buy these assets up, turn them into credits open lootboxes for a chance to acquire interesting, exclusive, and rarer assets. 
+Ideally, this creates an equilibrium price for common assets on the marketplace. If assets become too cheap, people can buy these assets up, turn them into credits and then use those to open lootboxes for a chance to acquire interesting, exclusive, and rarer assets. 
 
 Lootbox credits are per-developer and therefore do not interfere with other developer's ecosystem. If developer 1's ecosystem produces alot of Dev1 credit, the effect on Dev2's ecosystem is limited as Dev1's credits aren't redeemable elsewhere. Likewise, if Dev2 decides not to create lootboxes, only their assets' prices will converge to 0 over time due to the problem of oversupply.
 
