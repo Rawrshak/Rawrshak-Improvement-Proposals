@@ -36,33 +36,30 @@ Content creators can choose to launch their own instance of the Unique Content c
     -	Implements IMultipleRoyalties interface so that the Rawrshak exchange can properly pay out all royalty receivers.
 
 -   Mappings
-    -	Stores a mapping of (uint tokenId => uint uniqueAssetId)
-    -	Stores a mapping of (uint tokenId => address)
-
-    -   Stores a mapping of (uint uniqueAssetId => UniqueAsset)
+    -	Stores a mapping of (uint uniqueId => address)
+    -   Stores a mapping of (uint uniqueId => UniqueAsset)
         -   UniqueAsset struct is made up of
             -   address contentAddress
+            -   address tokenId
             -   mapping (uint version => string uri) uniqueAssetUri
                 -   or this could be a string, if the uri is permanent
-            -   bool idExists
             -   bool creatorLocked
 
 Functions in UniqueContent.sol include:
 -	Mint function to mint an asset to a user. This function takes in uniqueAssetData as a parameter.
     -   The uniqueAssetData struct is made up of:
         -	address contentAddress
-        -   uint tokenId (tokenId of the original item)
-        -	uint uniqueAssetId
+        -   uint tokenId (tokenId of original asset)
         -	string uniqueAssetUri
         -	address[] receiverAddresses
         -	uint[] royaltyRates
         -   boolean creatorLocked
+    -   Checks whether the sum of the royalty rates exceed 1e6
+    -   Checks whether receiverAddresses.length equal royaltyRates.length
     -	Checks whether the caller has the item in their possession.
     -	Receives the original item.
     -   Mints unique item.
-    -	Checks whether the uniqueAssetId exists.
-        -   If the uniqueAssetId already exists, then there's no need to update certain mappings.
-    -   Updates mappings
+    -   Updates mappings.
 -	Burn function to burn an asset.
     -	Checks whether the asset is creator locked.
     -	Checks whether the user has the unique item.
@@ -70,18 +67,19 @@ Functions in UniqueContent.sol include:
     -	Burns unique item.
 -	A function to retrieve the uri of the original item.
 -   A royaltyInfo function which will point to the royaltyInfo function of the original item's content contract.
--	A getRoyalties function which returns an array of receiver addresses and an array of royalty amounts calculated from the given salesprice and royalty rates.
+-	A getMultipleRoyalties function which returns an array of receiver addresses and an array of royalty amounts calculated from the given salesprice and royalty rates.
 -   For uniqueAssetUri, we can go about it two ways:
     -   The uri is permanent, and we will have a function to query a single uniqueAssetUri
     -   The uri is updateable, and there will be a function to update the uri and a function to query a specific version of the asset.
 
 #### MultipleRoyalties-
 This is an abstract contract inherited by UniqueContent.sol.
--	Stores a mapping of (uniqueAssetId =>  LibRoyalty.Fee[]) tokenRoyalties
+-	Stores a mapping of (uniqueId =>  LibRoyalty.Fee[])
+
 Functions in MultipleRoyalties.sol include:
 -	A function to update the additional royalties.
     -	Checks whether the sum of all royalties exceed 1e6. 
--	A function to return the royalties of a uniqueAssetId.
+-	A function to return the royalties of a uniqueId.
 
 ### Updating Subgraph
 Todo: Discuss subgraph changes that must be made.
