@@ -24,7 +24,7 @@ They will also be able to add additional royalties to their unique asset on top 
 
 Content creators can choose to lock assets such that only the creator of the unique asset can burn the item. This helps ensure that the content creator will not lose out on future royalties.
 
-Content creators can choose to launch their own instance of the Unique Content contract to sell their products, but this poses a financial barrier to entry for users who simply want to individualize their own assets. These users can instead access the global Rawrshak unique content contract for personal use.
+Content creators can choose to launch their own instance of the Unique Content contract to produce and sell their products, but this poses a financial barrier to entry for users who simply want to individualize their own assets. These users can instead access the global Rawrshak unique content contract for personal use.
 
 ### Proposed Technical Design
 
@@ -36,23 +36,24 @@ Content creators can choose to launch their own instance of the Unique Content c
     -	Implements IMultipleRoyalties interface so that the Rawrshak exchange can properly pay out all royalty receivers.
 
 -   Mappings
-    -	Stores a mapping of (uint uniqueId => address)
-    -   Stores a mapping of (uint uniqueId => UniqueAsset)
+    -   Stores a mapping of (uint256 uniqueId => uniqueAssetInfo)
         -   UniqueAsset struct is made up of
+            -   address creator
             -   address contentAddress
-            -   address tokenId
-            -   mapping (uint version => string uri) uniqueAssetUri
-                -   or this could be a string, if the uri is permanent
+            -   uint256 tokenId (tokenId of original asset)
+            -   uint256 version (can be omitted)
+            -   string[] uniqueAssetUri (can be a singular string)
             -   bool creatorLocked
 
 Functions in UniqueContent.sol include:
--	Mint function to mint an asset to a user. This function takes in uniqueAssetData as a parameter.
-    -   The uniqueAssetData struct is made up of:
+-	Mint function to mint an asset to a user. This function takes in uniqueAssetCreateData as a parameter.
+    -   The uniqueAssetCreateData struct is made up of:
+        -   address to
         -	address contentAddress
-        -   uint tokenId (tokenId of original asset)
+        -   uint256 tokenId (tokenId of original asset)
         -	string uniqueAssetUri
         -	address[] receiverAddresses
-        -	uint[] royaltyRates
+        -	uint256[] royaltyRates
         -   boolean creatorLocked
     -   Checks whether the sum of the royalty rates exceed 1e6
     -   Checks whether receiverAddresses.length equal royaltyRates.length
@@ -61,32 +62,45 @@ Functions in UniqueContent.sol include:
     -   Mints unique item.
     -   Updates mappings.
 -	Burn function to burn an asset.
+    -   checks whether the person burning the asset is the owner of the unique item.
     -	Checks whether the asset is creator locked.
-    -	Checks whether the user has the unique item.
     -	Transfers the original item back to the user.
     -	Burns unique item.
--	A function to retrieve the uri of the original item.
+    -   Deletes token information.
+-	An originalAssetUri function to retrieve the uri of the original item.
+-   A uri function to query the unique asset's uri.
+-   A setUniqueUri function to update the unique asset's uri.
 -   A royaltyInfo function which will point to the royaltyInfo function of the original item's content contract.
--	A getMultipleRoyalties function which returns an array of receiver addresses and an array of royalty amounts calculated from the given salesprice and royalty rates.
--   For uniqueAssetUri, we can go about it two ways:
-    -   The uri is permanent, and we will have a function to query a single uniqueAssetUri
-    -   The uri is updateable, and there will be a function to update the uri and a function to query a specific version of the asset.
+-	A multipleRoyaltyInfo function which returns an array of receiver addresses and an array of royalty amounts calculated from the given salesprice and royalty rates.
+-   A setTokenRoyalties function which updates the royalties of a function.
+
+For uniqueAssetUri, we can go about it two ways:
+-   The uri is permanent, and we will have a function to query a single uniqueAssetUri
+-   The uri is updateable, and there will be a function to update the uri and a function to query a specific version of the asset.
 
 #### MultipleRoyalties-
 This is an abstract contract inherited by UniqueContent.sol.
--	Stores a mapping of (uniqueId =>  LibRoyalty.Fee[])
+-	Stores a mapping of (uint256 uniqueId => LibRoyalty.Fee[])
 
-Functions in MultipleRoyalties.sol include:
--	A function to update the additional royalties.
-    -	Checks whether the sum of all royalties exceed 1e6. 
--	A function to return the royalties of a uniqueId.
+Internal functions in MultipleRoyalties.sol include:
+-	A helper function to update the royalties.
+-   A verifyRoyalties function which checks whether royalties designated are valid.
+-	A getMultipleRoyalties function to return the multiple royalties of a unique asset.
 
 ### Updating Subgraph
 Todo: Discuss subgraph changes that must be made.
 
 ### Exchange Updates
--   In RoyaltyManager.sol and its interface, a new function, similar to payableRoyaltyies() (such as payableMultipleRoyalties()), must be created which will return arrays of addresses and fees instead of just one of each. This so that the exchange can send transfer payments to more than one royalty receiver.
--   In Exchange.sol, a conditional must be added in functions fillBuyOrder() and fillSellOrder() which checks whether the content contract implements the IMultipleRoyalties interface. This will decide whether it will run the original loop function with payableRoyalties or the new loop that must be added, which uses payableMultipleRoyalties() instead.
+Currently the Rawrshak exchange contracts are only compatible with content contracts which use the ERC1155 token standard and so some changes must be made so that it can handle the exchange of ERC721 unique assets and pay out their corresponding multiple royalties.
+
+-   In RoyaltyManager.sol and its interface, a new function, similar to payableRoyaltyies() (such as payableMultipleRoyalties()), must be created which will return arrays of addresses and fees instead of just one of each. This so that the exchange can send transfer payments to multiple royalty receivers.
+-   In Exchange.sol, and its interface, two new functions must be added, similar to fillBuyOrder() and fillSellOrder(), with the difference that they will specifically handle ERC721 NFTs. They will strip away irrelevant modifiers, discard amountToBuy/amounToSell as a parameter, and use payableMultipleRoyalties() to retreive royalties and run a loop of transferRoyalty() to send payments.
+-   In NftEscrow.sol, the _transfer() internal function, which exclusively transfers ERC1155 tokens, must be modified to call the transfer function of an ERC721 contract in case the token exchanged is a unique asset (ie. the content contract supports the IMultipleRoyalties interface). This change affects all deposit and withdraws functions on this contract which is called whenever a buy or sell order is executed, or when someone cancels or claims an order.
+
+Design Considerations:
+-   Exchange.sol
+    -   It is possible modify the original fill order functions to handle ERC721 tokens. It can check whether the content contract implements the IMultipleRoyalties interface. This will decide whether it will run the original loop function with payableRoyalties or simply run payableMultipleRoyalties() once and a loop of transferRoyalty().
+    -   However, the benefit of creating new fill order functions is to open the possibility down the line of allowing users to buy multiple unique assets in one go. This idea is incompatible with the original fill order functions which require all order Ids to have the same token information.
 
 ## Rationale
 
