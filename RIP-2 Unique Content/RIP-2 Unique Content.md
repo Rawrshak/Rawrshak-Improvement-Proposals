@@ -32,6 +32,7 @@ Content creators can choose to launch their own instance of the Unique Content c
 -   Interface implementations:
     -	Implements ERC721 so that the contract will be compatible with dApps like Rawrshak’s own exchange and other marketplaces on Ethereum.
     -	Implements ERC1155HolderUpgradeable which gives the contract the ability to receive the original assets required to mint.
+    -   Implements ERC721HolderUpgradeable for the same reason as the one above.
     -	Implements ERC2981 so that other exchanges can query the original developer's receiver address and rate when sending payment transfers for royalties.
     -	Implements IMultipleRoyalties interface so that the Rawrshak exchange can properly pay out all royalty receivers.
     -   Implements IUniqueContent interface so that it can update and query necessary information about its unique assets.
@@ -46,19 +47,19 @@ Functions in UniqueContent.sol include:
         -	address[] receiverAddresses
         -	uint256[] royaltyRates
         -   boolean creatorLocked
+    -   Checks whether the original asset supports IERC2981Upgradeable and IERC1155Upgradeable or ERC721Upgradeable interfaces.
     -   Checks whether the sum of the royalty rates exceed 2e5.
     -   Checks whether receiverAddresses.length equal royaltyRates.length
-    -	Checks whether the caller has the original item in their possession.
     -	Receives the original item.
-    -   Mints unique item to specified address.
     -   Updates mappings.
+    -   Mints unique item to specified address.
     -   Emits Mint Event.
 -	Burn function to burn an asset.
     -   Checks whether the person burning the asset is the owner of the unique item.
     -	Checks whether the asset is creator locked or if the caller is the creator.
     -	Burns unique item.
-    -	Transfers the original item back to the user.
     -   Deletes token information.
+    -	Transfers the original item back to the user.
     -   Emits a Burn event.
 -	An originalAssetUri function to retrieve the uri of the original item.
 -   Two tokenURI functions to query the unique asset's latest uri version or a specific version.
@@ -72,7 +73,7 @@ For uniqueAssetUri, we can go about it two ways:
 -   The uri is updateable, and there will be a function to update the uri and a function to query a specific version of the asset.
 
 #### UniqueContentStorage.sol-
-This contract will contain and retrieve the token information of a unique asset.
+This contract will store and retrieve the token information of a unique asset.
 -   Mappings:
     -   Stores a mapping of (uint256 uniqueId => LibAsset.uniqueAsset) uniqueAssetInfo
         -   UniqueAsset struct is made up of
@@ -84,31 +85,45 @@ This contract will contain and retrieve the token information of a unique asset.
             -   bool creatorLocked
 
 Functions in UniqueContent.sol include:
--   setUniqueAssetInfo function updates the uniqueAssetInfo mapping with the token info of the newly minted unique asset.
--   burnUniqueAssetInfo function which deletes the unique asset's data from the uniqueAssetInfo mapping.
--   tokenURI function to retrieve the specific version of a token's uri.
--   setUniqueUri function pushes a new uri to the uniqueAssetUri string array and increments the token version.
--   verifyRoyalties function verifies whether the given royalties are valid to use.
--   getRoyalty function retrieves the original receiver address and royalty amount.
--   getMultipleRoyalties function retrieves all royalty receivers and royalty amounts for a unique asset.
--   setTokenRoyalties function updates a unique asset's token royalties.
--   isCreator function verifies whether an address matches the creator address of a unique asset.
--   isLocked function checks whether the a unique asset is creator locked.
--   getAssetData retrives the corresponding original token id and content contract address of a unique asset.
-
+-   A setUniqueAssetInfo function updates the uniqueAssetInfo mapping with the token info of the newly minted unique asset.
+-   A burnUniqueAssetInfo function which deletes the unique asset's data from the uniqueAssetInfo mapping.
+-   A tokenURI function to retrieve the specific version of a token's uri.
+-   A setUniqueUri function pushes a new uri to the uniqueAssetUri string array and increments the token version.
+-   A getRoyalty function retrieves the original receiver address and royalty amount.
+-   A getMultipleRoyalties function retrieves all royalty receivers and royalty amounts for a unique asset.
+-   A setTokenRoyalties function updates a unique asset's token royalties.
+-   An isCreator function verifies whether an address matches the creator address of a unique asset.
+-   An isLocked function checks whether the a unique asset is creator locked.
+-   A getAssetData function retrives the corresponding original token id and content contract address of a unique asset.
 
 #### MultipleRoyalties.sol-
 This is an abstract contract inherited by UniqueContentStorage.sol.
 -   Mappings:
-    -	Stores a mapping of (uint256 uniqueId => address[]) royaltyReceivers;
-    -   Stores a mapping of (uint256 uniqueId => uint24[]) royaltyRates;
+    -	Stores a mapping of (uint256 uniqueId => address[]) royaltyReceivers
+    -   Stores a mapping of (uint256 uniqueId => uint24[]) royaltyRates
 
 Internal functions in MultipleRoyalties.sol include:
 -	A setTokenRoyalties helper function to update the royalties.
--   A verifyRoyalties helper function which checks whether royalties designated are valid.
 -	A getMultipleRoyalties helper function to return the multiple royalties of a unique asset.
 -   A deleteTokenRoyalties helper function to delete the token royalties of a unique asset.
 -   A getTokenRoyaltiesLength helper function to ascertain the size of an array of receivers.
+
+#### LibRoyalty.sol
+-   Updates:
+    -   A verifyRoyalties function must be added which verifies whether the given royalties are valid to use.
+
+#### UniqueContentFactory.sol-
+This contract will create clones of the unique content contracts
+-   State Variables:
+    -   uniqueContentImplementation
+    -   uniqueContentStorageImplementation
+    -   contractVersion
+
+Functions in UniqueContentFactory.sol include:
+-   An updateContracts function to update the uniqueContent and uniqueContentStorage implementation addresses.
+-   A contentExists function to query whether the given proxy contract exists.
+-   A createContracts function which creates and initializes clones of the unique content contracts.
+
 
 ### Updating Subgraph
 Todo: Discuss subgraph changes that must be made.
@@ -116,17 +131,28 @@ Todo: Discuss subgraph changes that must be made.
 ### Exchange Updates
 Currently the Rawrshak exchange contracts are only compatible with content contracts which use the ERC1155 token standard and so some changes must be made so that it can handle the exchange of ERC721 unique assets and pay out their corresponding multiple royalties.
 
--   In RoyaltyManager.sol and its interface, a new function, called payableMultipleRoyalties()), must be created which will return arrays of addresses and fees instead of just one of each. Two new functions can also be added called TransferMultipleRoyalties() each with different sets of parameters, which one is called depends on whether the order is a buy order or sell order. Instead of calling the transferRoyalty() function multiple times per unique asset, TransferMultipleRoyalties() will be called once and will handle paying out the receivers.
--   In Exchange.sol, and its interface, a new function must be added, similar to fillBuyOrder() and fillSellOrder(), with the difference that they will specifically handle ERC721 NFTs. They will strip away irrelevant modifiers, discard amountToBuy/amounToSell as a parameter, and use payableMultipleRoyalties() to retrieve royalties and call TransferMultipleRoyalties() to send payments. A new event called UniqueOrdersFilled will also have to be added. The functions fillBuyOrder() and fillSellOrder() must be combined into a function called fillOrder() to remain within the contract code size limit in light of necessary additions to exchange contract.
--   In ExecutionManager.sol and its interface, a new function called executeUniqueBuyOrder() must be added that can handle depositing more than one type of asset to escrow.
--   In NftEscrow.sol, the _transfer() internal function, which exclusively transfers ERC1155 tokens, must be modified to call the transfer function of an ERC721 contract in case the token exchanged is a unique asset (ie. the content contract supports the IMultipleRoyalties interface). This change affects all deposit and withdraws functions on this contract which is called whenever a buy or sell order is executed, or when someone cancels or claims an order.
-- In Orderbook.sol and its interface, a new function called verifyTokenPayment must be added. It would fill a similar role to verifyAllOrdersData() for the fillUniqueOrder() function in Exchange.sol but it will not require that that the orderIds be the same type of asset. To combine fillBuyOrder() and fillSellOrder() in the Exchange.sol contract, verifyAllOrdersData() must check whether all the orderIds' _isBuyOrder boolean simply match each other rather than match the boolean parameter that is designated depending on whether the function is called by fillBuyOrder() or fillSellOrder().
+-   Erc20Escrow.sol:
+    -   Two new functions must be added, both called TransferMultipleRoyalties(), each with different sets of parameters. Which one is called depends on whether the order which calls this function is a buy order or sell order. Instead of calling the transferRoyalty() function in Exchange.sol multiple times per unique asset, TransferMultipleRoyalties() will be called once and will handle paying out the receivers.
+-   RoyaltyManager.sol:
+    -   A new function, called payableMultipleRoyalties()), must be created which will return arrays of addresses and fees instead of just one of each.
+    -   This contract will also contain TransferMultipleRoyalties() functions which will call the ones in Erc20Escrow.
+-   Exchange.sol:
+    -   A new function must be added, similar to fillBuyOrder() and fillSellOrder(), with the difference that they will specifically handle ERC721 NFTs. It will strip away irrelevant modifiers, discard amountToBuy/amountToSell and maxSpend as parameters, and use payableMultipleRoyalties() to retrieve royalties and call TransferMultipleRoyalties() to send payments. 
+    -   A new event called UniqueOrdersFilled will also have to be added.
+    -   The functions fillBuyOrder() and fillSellOrder() must subsequently be combined into a function called fillOrder() to remain within the contract code size limit in light of necessary additions to exchange contract.
+-   ExecutionManager.sol:
+    -   A new function called executeUniqueBuyOrder() must be added that can handle depositing more than one type of asset to escrow.
+-   In NftEscrow.sol:
+    -   the internal _transfer() function, which exclusively transfers ERC1155 tokens, must be modified to call the transfer function of an ERC721 contract in case the token exchanged is an ERC721 NFT. This change affects all deposit and withdraws functions on this contract which is called whenever a buy or sell order is executed, or when someone cancels or claims an order.
+- In Orderbook.sol:
+    -   A new function called verifyTokenPayment must be added. It would fill a similar role to verifyAllOrdersData() for the fillUniqueOrder() function in Exchange.sol but it will not require that that the orderIds be the same type of asset.
+    -   To combine fillBuyOrder() and fillSellOrder() in the Exchange.sol contract, verifyAllOrdersData() must check whether all the orderIds' _isBuyOrder boolean simply match each other rather than match the boolean parameter that was designated originally by fillBuyOrder() and fillSellOrder().
 
 Design Considerations:
 -   Exchange.sol
     -   It is possible modify the original fill order functions to handle ERC721 tokens. It can check whether the content contract implements the IMultipleRoyalties interface. This will decide whether it will run the original loop function with payableRoyalties or simply run payableMultipleRoyalties() once and a loop of transferRoyalty().
     -   However, the benefit of creating new fill order functions is to open the possibility down the line of allowing users to buy multiple unique assets in one go. This idea is incompatible with the original fill order functions which require all order Ids to have the same token information.
-    -   It is under consideration whether an entirely new UniqueExchange.sol contract can be created in the future to specifically handle ERC721 NFTs.
+    -   It is under consideration whether an entirely new UniqueExchange.sol contract can be created in the future to specifically handle the exchange of ERC721 NFTs.
 
 ## Rationale
 
