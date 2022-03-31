@@ -43,10 +43,10 @@ Inherits:
 Global variables:
 -   uint64 lastAccessed - blockNumber of the last time an account was accessed.
 -   bytes32 - password for locking the account, cannot be queried.
--   address[] backupAddresses- backUp accounts in case the main account's private keys are lost.
 -   uint64 maxSecurityTimeout- a blockNumber which represents the length of time required before a backup address can request permission to access the account.
 -   uint64 lastPaused - blockNumber of when the contract's withdrawal function has been frozen.
 -   uint256 amountTimeUnlocked- blockNumber which represents the amount of time before an account is locked.
+-   address[] backupAddresses- backUp accounts in case the main account's private keys are lost.
 
 Functions:
 -   depositBatch function to deposit multiple assets. This function takes in an array of assetData structs, an array of uint256 deposit amounts and an address.
@@ -55,7 +55,7 @@ Functions:
 -   withdrawBatch function to withdraw multiple assets. This function takes in an array of assetData structs, an array of uint256 withdraw amounts and an address.
     -   calls the withdraw function in BankStorage.sol to update the itemBalances mapping.
     -   calls a transfer function to retrieve the item from the bank to the user.
--   rescueToken function, which takes in a contract address and token id, allows the user to retrieve tokens transferred to the bank contract without using depositBatch. It reconciles the mapping in BankStorage.sol with the value queried by balanceOf(Bank.sol address).
+-   rescueToken function, which takes in a contract address and token id, allows the user to retrieve tokens which were transferred to the bank contract without using depositBatch. It reconciles the mapping in BankStorage.sol with the token amount in possession by the Bank contract.
 -   addBackup function to add a back up address in case one loses their keys.
 -   removeBackup function to remove an address from the backupAddresses array.
 -   setPassword function which takes in strings of the old password and new password. If the old password is confirmed, it hashes the new password and sets it as the account password.
@@ -64,6 +64,9 @@ Functions:
 -   hashPassword internal function which creates a hash of the given password string.
 
 #### BankStorage.sol
+Inherits:
+-    OwnableUpgradeable which guarantees that only the Bank contract can call its functions.
+
 Mappings:
 -   mapping(address contractAddress => mapping(uint256 tokenId => uint256 tokenAmount)) itemBalances
 
